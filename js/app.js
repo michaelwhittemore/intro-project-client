@@ -36,6 +36,9 @@ function addToVideoQueue(Id, role) {
     fetch(SERVER_BASE_URL + '/queue', {
         mode:'cors',
         method: 'POST',
+        headers: {
+            'Access-Control-Allow-Origin': '*'
+        },
         body: JSON.stringify({ userId: Id, userRole: role })
     }).then(res => {
         apiKey = res.apiKey;
