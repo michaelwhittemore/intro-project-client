@@ -1,8 +1,3 @@
-// // replace these values with those generated in your TokBox Account
-// var apiKey = "46418002";
-// var sessionId = "1_MX40NjQxODAwMn5-MTU2ODA2NjE4NzYwM356RVBkYWlyUkVESWMwUU5SRXdZY2NPcS9-fg";
-// var token = "T1==cGFydG5lcl9pZD00NjQxODAwMiZzaWc9YjE5NWNiOTJjOTdhMjI5ZmI4NTI1NTYxNGNmNjM5MWMzNzliMmFjODpzZXNzaW9uX2lkPTFfTVg0ME5qUXhPREF3TW41LU1UVTJPREEyTmpFNE56WXdNMzU2UlZCa1lXbHlVa1ZFU1dNd1VVNVNSWGRaWTJOUGNTOS1mZyZjcmVhdGVfdGltZT0xNTY4MDY2OTgyJm5vbmNlPTAuMTAwOTU0NzE2MjU4NTQ3OCZyb2xlPXB1Ymxpc2hlciZleHBpcmVfdGltZT0xNTcwNjU4OTgyJmluaXRpYWxfbGF5b3V0X2NsYXNzX2xpc3Q9";
-
 
 // Handling all of our errors here by alerting them
 function handleError(error) {
@@ -12,23 +7,62 @@ function handleError(error) {
 }
 
 var SERVER_BASE_URL = 'https://intro-project.herokuapp.com';
+//var SERVER_BASE_URL="localhost:3000" //Remove this later, use for testing
 window.onload = () => {
-    //check if we already have a userID, if not ping the server to set up a user
-    if (sessionStorage.getItem('userID') === null) {
-        console.log("No userID in storage")
-        document.getElementById("connected").innerText = "No userID in storage"
+    //check if we already have a userId, if not ping the server to set up a user
+    if (sessionStorage.getItem('userId') === null) {
+        document.getElementById("connected").innerText = "Setting up new user..."
+        fetch(SERVER_BASE_URL + '/newUser').then(res => {
+            return res.json()
+        }).then(res => {
+            console.log(res)
+            sessionStorage.setItem('userId', res['userId'])
+            sessionStorage.setItem('userRole', res['userRole'])
+            setUser()
+        })
+    } else {
+        setUser()
     }
+    //enter the video queue
+    document.getElementById("start-video").onclick = () => {
+        console.log('look for vid')
+        //TODO make call to sever adding to the queue and starting a session
+        addToVideoQueue(sessionStorage.getItem('userId'), sessionStorage.getItem('userRole'))
+    }
+
 }
-console.log("ask server for credentials")
-fetch(SERVER_BASE_URL + '/session').then(function (res) {
-    return res.json()
-}).then(function (res) {
-    apiKey = res.apiKey;
-    console.log(res)
-    sessionId = res.sessionId;
-    token = res.token;
-    initializeSession();
-}).catch(handleError);
+function addToVideoQueue(Id, role) {
+    console.log('sending ' + JSON.stringify({ userId: Id, userRole: role }))
+    fetch(SERVER_BASE_URL + '/queue', {
+        mode:'cors',
+        method: 'POST',
+        body: JSON.stringify({ userId: Id, userRole: role })
+    }).then(res => {
+        apiKey = res.apiKey;
+        console.log(res)
+        sessionId = res.sessionId;
+        token = res.token;
+        initializeSession();
+    }).catch(handleError);
+}
+
+//sets up a newuser from session storage
+function setUser() {
+    document.getElementById("start-video").disabled = false;
+    document.getElementById("connected").innerText = `User Id (for troubleshooting): ${sessionStorage.getItem('userId')} \nUser Role: ${sessionStorage.getItem('userRole')}`
+}
+
+
+//start a video feed
+// fetch(SERVER_BASE_URL + '/session').then(function (res) {
+//     return res.json()
+// }).then(function (res) {
+//     apiKey = res.apiKey;
+//     console.log(res)
+//     sessionId = res.sessionId;
+//     token = res.token;
+//     initializeSession();
+// }).catch(handleError);
 
 
 
@@ -39,7 +73,7 @@ function initializeSession() {
     session.on('streamCreated', function (event) {
         session.subscribe(event.stream, 'subscriber', {
             insertMode: 'append',
-            width: '100%',
+            wIdth: '100%',
             height: '100%'
         }, handleError);
     });
@@ -47,7 +81,7 @@ function initializeSession() {
     // Create a publisher
     var publisher = OT.initPublisher('publisher', {
         insertMode: 'append',
-        width: '100%',
+        wIdth: '100%',
         height: '100%'
     }, handleError);
 
