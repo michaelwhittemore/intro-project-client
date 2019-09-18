@@ -25,3 +25,15 @@ body, html {
     border-radius: 3px;
 }
 
+.incoming-message {
+    text-align: left;
+}
+.outgoing-message {
+    text-align: right;
+}
+
+#text-chat-area {
+    background-color: whitesmoke;
+    width: 30%;
+    display: block;
+}

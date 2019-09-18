@@ -50,8 +50,48 @@ function addToVideoQueue(Id, role) {
             initializeSession(apiKey, sessionId);
         }).catch(handleError);
 }
-function chatButtonBuilder (){
-    
+function chatButtonBuilder(session) {
+    session.on('signal:message', event => {
+        // not from us
+        if (session.connection && event.from.connectionId != session.connection.id) {
+            let incomingMessage = event.data;
+            console.log("incomingMessage: " + incomingMessage)
+            //TODO append their incomingMessage with CSS
+            let incomingChat = document.createElement('div')
+            incomingChat.innerText = incomingMessage
+            incomingChat.setAttribute('class', 'incoming-message')
+            document.getElementById("text-chat-area").append(incomingChat)
+        }
+    })
+    document.getElementById("submit-chat").onclick = () => {
+        let outgoingMessage = document.getElementById("chat-form").value;
+        //TODO append your message
+        console.log('outgoingMessage:', outgoingMessage)
+        session.signal({
+            type: 'message',
+            data: outgoingMessage
+        }, handleError)
+        let outgoingChat = document.createElement('div')
+        outgoingChat.innerText = outgoingMessage
+        outgoingChat.setAttribute('class', 'outgoing-message')
+        document.getElementById("text-chat-area").append(outgoingChat)
+
+    }
+}
+// ties the button to the sessionId
+function archiveButtonBuilder(sessionId) {
+    document.getElementById('archive-video').onclick = () => {
+        console.log('sessionId for the archive', sessionId)
+        fetch(SERVER_BASE_URL + '/start-archive',
+            {
+                method: 'POST',
+                body: JSON.stringify({ sessionId: sessionId }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        )
+    }
 }
 //sets up a newuser from session storage
 function setUser() {
@@ -63,6 +103,7 @@ function newSessionButtons(session) {
     document.getElementById("start-video").disabled = true;
     document.getElementById("disconnect-video").disabled = false;
     document.getElementById('screen-share').disabled = false;
+    document.getElementById('archive-video').disabled = false;
     document.getElementById("disconnect-video").onclick = () => {
         session.disconnect();
     }
@@ -72,6 +113,8 @@ function noSessionButtons() {
     document.getElementById('start-video').disabled = false;
     document.getElementById('disconnect-video').disabled = true;
     document.getElementById('screen-share').disabled = true;
+    document.getElementById('archive-video').disabled = true;
+
 }
 
 function initializeSession(apiKey, sessionId) {
@@ -109,13 +152,16 @@ function initializeSession(apiKey, sessionId) {
             newSessionButtons(session);
         }
         // set up chat area when session is connected
-
+        chatButtonBuilder(session);
+        //set up archive with new buttons
+        archiveButtonBuilder(session.sessionId)
     });
 
     // when another disconnects
     session.on('connectionDestroyed', function (event) {
         console.log('connection destroyed. logging event: ', event)
         session.disconnect()
+
     })
     // when YOU disconnect
     session.on('sessionDisconnected', function (event) {
@@ -130,9 +176,6 @@ function initializeSession(apiKey, sessionId) {
         }).catch(handleError)
         noSessionButtons();
     })
-    //TODO CURRENTLY JUST TESTING - IDEALLY WE SHOULD SWITCH BETWEEN 
-    //SCREEN SHARING AND WEBCAM
-    //START BY TRYING A NEW PUBLISHER??
     // publisher to the session via screen sharing 
     document.getElementById("screen-share").onclick = () => {
         if (!screenShare) {
@@ -146,7 +189,7 @@ function initializeSession(apiKey, sessionId) {
             )
             session.unpublish(webCamPublisher)
             session.publish(screenSharePublisher, handleError);
-            screenShare=true;
+            screenShare = true;
         } else if (screenShare) {
             webCamPublisher = OT.initPublisher('publisher', {
                 insertMode: 'append',
@@ -155,13 +198,15 @@ function initializeSession(apiKey, sessionId) {
             }, handleError);
             session.unpublish(screenSharePublisher)
             session.publish(webCamPublisher, handleError);
-            screenShare=false;
+            screenShare = false;
         }
     }
     session.on('streamDestroyed', (event) => {
         console.log('stream destroyed: ' + event);
     })
-
+    session.on('archiveStarted', event => {
+        console.log('archive started:', event)
+    })
 }
 
 

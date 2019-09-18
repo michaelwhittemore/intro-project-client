@@ -1,3 +1,10 @@
 {
-  "extends": "eslint-config-airbnb"
+  "extends": "airbnb-base/legacy",
+  "rules": {
+    "no-restricted-syntax": ["off", "ForInStatement"],
+    "no-console": ["error", { "allow": ["log", "error"] }]
+  },
+  "env": {
+    "es6": true
+  }
 }
