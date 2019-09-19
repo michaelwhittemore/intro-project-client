@@ -2,8 +2,8 @@
 
 <head>
     <title> Investor Match </title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
 
     <link href="css/app.css" rel="stylesheet" type="text/css">
     <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
@@ -17,33 +17,41 @@
             <p> info </p>
         </div>
         <!--main grid-->
-        <div id="page-content-wrapper">
-            <div id="connected">
-                Here's a div
-            </div>
-            <div id="button-area">
-                <button id="start-video" disabled>
-                    Enter video queue
-                </button>
-                <button id="disconnect-video" disabled>
-                    Disconnect
-                </button>
-                <button id="screen-share" disabled>
-                    Toggle Screen Sharing
-                </button>
-                <button id="archive-video" disabled> 
-                    Start Archiving
-                </button>
-            </div>
-            <div id="videos">
-                <div id="subscriber"></div>
-                <div id="publisher"></div>
-            </div>
-            <div id=chat-wrapper> 
-                
-                <input type="text" id="chat-form"></form>
-                <input type="submit"id="submit-chat"></input>
-                <div id="text-chat-area"> Text Chat Area </div>
+        <div id="page-content-wrapper" class="container-fluid">
+            <div class="row" id="row-wrapper">
+                <!--left column-->
+                <div class="col">
+                        <div id="connected">
+                                Here's a div
+                            </div>
+                    <div id="button-area">
+                        <button id="start-video" disabled>
+                            Enter video queue
+                        </button>
+                        <button id="disconnect-video" disabled>
+                            Disconnect
+                        </button>
+                        <button id="screen-share" disabled>
+                            Toggle Screen Sharing
+                        </button>
+                        <button id="archive-video" disabled>
+                            Start Archiving
+                        </button>
+                    </div>
+                    <div id="videos">
+                        <div id="subscriber"></div>
+                        <div id="publisher"></div>
+                    </div>
+                </div>
+                <!-- right column-->
+                <div class="col">
+                    <div> Text Chat</div>
+                    <div id=chat-wrapper class="overflow-auto">
+                        <input type="text" id="chat-form"></form>
+                        <input type="submit" id="submit-chat"></input>
+                        <div id="text-chat-area">  </div>
+                    </div>
+                </div>
             </div>
         </div>
 

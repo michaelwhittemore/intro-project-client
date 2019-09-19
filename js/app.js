@@ -5,8 +5,11 @@ function handleError(error) {
     }
 }
 
-//var SERVER_BASE_URL = 'https://intro-project.herokuapp.com';
-var SERVER_BASE_URL = "http://localhost:3000" //Remove this later, use for testing
+//const SERVER_BASE_URL = 'https://intro-project.herokuapp.com';
+const SERVER_BASE_URL = "http://localhost:3000" //Remove this later, use for testing
+let archiveToggle = false // it seems like there is no way to get the
+// status of the archive directly from the session??? so i'm 
+// using a toggle instead of having to query the server
 window.onload = () => {
     //check if we already have a userId, if not ping the server to set up a user
     if (sessionStorage.getItem('userId') === null) {
@@ -14,7 +17,7 @@ window.onload = () => {
         fetch(SERVER_BASE_URL + '/newUser').then(res => {
             return res.json()
         }).then(res => {
-            console.log(res)
+            console.log('sucessfully got id and role:',res)
             sessionStorage.setItem('userId', res['userId'])
             sessionStorage.setItem('userRole', res['userRole'])
             setUser()
@@ -34,6 +37,7 @@ window.onload = () => {
 function addToVideoQueue(Id, role) {
     let body = JSON.stringify({ userId: Id, userRole: role })
     console.log('sending ' + body)
+    appendMessage('Entrering the video','alert-message');
     fetch(SERVER_BASE_URL + '/queue',
         {
             method: 'POST',
@@ -56,47 +60,76 @@ function chatButtonBuilder(session) {
         if (session.connection && event.from.connectionId != session.connection.id) {
             let incomingMessage = event.data;
             console.log("incomingMessage: " + incomingMessage)
-            //TODO append their incomingMessage with CSS
-            let incomingChat = document.createElement('div')
-            incomingChat.innerText = incomingMessage
-            incomingChat.setAttribute('class', 'incoming-message')
-            document.getElementById("text-chat-area").append(incomingChat)
+            appendMessage(incomingMessage,'incoming-message')
         }
     })
     document.getElementById("submit-chat").onclick = () => {
         let outgoingMessage = document.getElementById("chat-form").value;
-        //TODO append your message
+        document.getElementById("chat-form").value= '';
         console.log('outgoingMessage:', outgoingMessage)
         session.signal({
             type: 'message',
             data: outgoingMessage
         }, handleError)
-        let outgoingChat = document.createElement('div')
-        outgoingChat.innerText = outgoingMessage
-        outgoingChat.setAttribute('class', 'outgoing-message')
-        document.getElementById("text-chat-area").append(outgoingChat)
-
+        appendMessage(outgoingMessage,'outgoing-message');
     }
+    // let you submit via enter
+    document.addEventListener('keydown',( event =>{
+        if (event.keyCode === 13){
+            document.getElementById('submit-chat').click()
+        }
+    }))
+}
+//attch a message to the chat area with relevant styling
+//either 'incoming-message','outgoing-message','alert-message'
+function appendMessage (message,style){
+    let messageElement = document.createElement('div')
+    messageElement.innerText = message
+    messageElement.setAttribute('class', style)
+    document.getElementById("text-chat-area").append(messageElement)
 }
 // ties the button to the sessionId
 function archiveButtonBuilder(sessionId) {
     document.getElementById('archive-video').onclick = () => {
-        console.log('sessionId for the archive', sessionId)
-        fetch(SERVER_BASE_URL + '/start-archive',
-            {
-                method: 'POST',
-                body: JSON.stringify({ sessionId: sessionId }),
-                headers: {
-                    'Content-Type': 'application/json'
+        if (!archiveToggle) { // no current archive
+            console.log('sessionId for starting archive', sessionId)
+            appendMessage('Starting Archive','alert-message');
+
+            fetch(SERVER_BASE_URL + '/start-archive',
+                {
+                    method: 'POST',
+                    body: JSON.stringify({ sessionId: sessionId }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 }
-            }
-        )
+            ).then(res => {
+                console.log('archive start response', res.body)
+            })
+        } else if (archiveToggle) {
+            archiveStopper(sessionId)
+        }
     }
+}
+function archiveStopper(sessionId) {
+    fetch(SERVER_BASE_URL + '/stop-archive',
+        {
+            method: 'POST',
+            body: JSON.stringify({ sessionId: sessionId }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }
+    ).then(res => {
+        console.log('archive stop response', res.body)
+    })
+    document.getElementById('archive-video').innerText = 'Start Archiving'
+    archiveToggle = false;
 }
 //sets up a newuser from session storage
 function setUser() {
     document.getElementById("start-video").disabled = false;
-    document.getElementById("connected").innerText = `User Id (for troubleshooting): ${sessionStorage.getItem('userId')} \nUser Role: ${sessionStorage.getItem('userRole')}`
+    document.getElementById("connected").innerText = `User Id: ${sessionStorage.getItem('userId')} \nUser Role: ${sessionStorage.getItem('userRole')}`
 }
 //updates the buttons, should be called whenever we connect to a new session
 function newSessionButtons(session) {
@@ -166,7 +199,6 @@ function initializeSession(apiKey, sessionId) {
     // when YOU disconnect
     session.on('sessionDisconnected', function (event) {
         console.log('session disconnected. logging event: ', event)
-
         fetch(SERVER_BASE_URL + '/remove-from-queue', {
             method: 'DELETE',
             body: JSON.stringify({ userId: sessionStorage.getItem('userId') }),
@@ -175,6 +207,9 @@ function initializeSession(apiKey, sessionId) {
             }
         }).catch(handleError)
         noSessionButtons();
+        archiveStopper(session.sessionId)
+        appendMessage('Video chat ended','alert-message');
+
     })
     // publisher to the session via screen sharing 
     document.getElementById("screen-share").onclick = () => {
@@ -190,6 +225,7 @@ function initializeSession(apiKey, sessionId) {
             session.unpublish(webCamPublisher)
             session.publish(screenSharePublisher, handleError);
             screenShare = true;
+            appendMessage('Screen share enabled','alert-message');
         } else if (screenShare) {
             webCamPublisher = OT.initPublisher('publisher', {
                 insertMode: 'append',
@@ -199,6 +235,7 @@ function initializeSession(apiKey, sessionId) {
             session.unpublish(screenSharePublisher)
             session.publish(webCamPublisher, handleError);
             screenShare = false;
+            appendMessage('Sceen share disabled','alert-message');
         }
     }
     session.on('streamDestroyed', (event) => {
@@ -206,6 +243,18 @@ function initializeSession(apiKey, sessionId) {
     })
     session.on('archiveStarted', event => {
         console.log('archive started:', event)
+        console.log(session.archives)
+        document.getElementById('archive-video').innerText = 'Stop Archiving'
+        archiveToggle = true;
+    })
+    session.on('archiveStopped', event => {
+        console.log('archive stopped:', event)
+        appendMessage('Archive stopped','alert-message');
+        //this behavior is either triggered by us disconnecting from the
+        //session or the archive, the listener doesn't seem to work once we
+        //disconnect from the session
+        document.getElementById('archive-video').innerText = 'Start Archiving'
+        archiveToggle = false;
     })
 }
 

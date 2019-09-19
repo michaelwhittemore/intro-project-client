@@ -6,23 +6,25 @@ body, html {
 #videos {
     position: relative;
     width: 100%;
-    /* height: 100%;  */
+    height: 100%; 
     margin-left: auto;
     margin-right: auto;
 }
 
 #subscriber {
-    height: 30%;
-    width: 30%;
+    height: 50%;
+    width: 100%;
     border: 3px solid white;
     border-radius: 3px;
+    margin: 3px;
 }
 
 #publisher {
-    height: 30%;
-    width: 30%;
+    height: 50%;
+    width: 100%;
     border: 3px solid white;
     border-radius: 3px;
+    margin: 3px;
 }
 
 .incoming-message {
@@ -31,9 +33,17 @@ body, html {
 .outgoing-message {
     text-align: right;
 }
-
+.alert-message {
+    color:red;
+}
 #text-chat-area {
     background-color: whitesmoke;
-    width: 30%;
+    width: 90%;
     display: block;
+}
+#row-wrapper{
+    height:100%
+}
+#page-content-wrapper{
+    height: 70%
 }
