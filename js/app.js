@@ -17,7 +17,7 @@ window.onload = () => {
         fetch(SERVER_BASE_URL + '/newUser').then(res => {
             return res.json()
         }).then(res => {
-            console.log('sucessfully got id and role:',res)
+            console.log('sucessfully got id and role:', res)
             sessionStorage.setItem('userId', res['userId'])
             sessionStorage.setItem('userRole', res['userRole'])
             setUser()
@@ -37,7 +37,7 @@ window.onload = () => {
 function addToVideoQueue(Id, role) {
     let body = JSON.stringify({ userId: Id, userRole: role })
     console.log('sending ' + body)
-    appendMessage('Entrering the video','alert-message');
+    appendMessage('Entering the video', 'alert-message');
     fetch(SERVER_BASE_URL + '/queue',
         {
             method: 'POST',
@@ -60,41 +60,56 @@ function chatButtonBuilder(session) {
         if (session.connection && event.from.connectionId != session.connection.id) {
             let incomingMessage = event.data;
             console.log("incomingMessage: " + incomingMessage)
-            appendMessage(incomingMessage,'incoming-message')
+            appendMessage(incomingMessage, 'incoming-message')
         }
     })
     document.getElementById("submit-chat").onclick = () => {
         let outgoingMessage = document.getElementById("chat-form").value;
-        document.getElementById("chat-form").value= '';
+        document.getElementById("chat-form").value = '';
         console.log('outgoingMessage:', outgoingMessage)
         session.signal({
             type: 'message',
             data: outgoingMessage
         }, handleError)
-        appendMessage(outgoingMessage,'outgoing-message');
+        appendMessage(outgoingMessage, 'outgoing-message');
     }
     // let you submit via enter
-    document.addEventListener('keydown',( event =>{
-        if (event.keyCode === 13){
+    document.addEventListener('keydown', (event => {
+        if (event.keyCode === 13) {
             document.getElementById('submit-chat').click()
         }
     }))
 }
 //attch a message to the chat area with relevant styling
 //either 'incoming-message','outgoing-message','alert-message'
-function appendMessage (message,style){
+function appendMessage(message, style) {
     let messageElement = document.createElement('div')
     messageElement.innerText = message
     messageElement.setAttribute('class', style)
     document.getElementById("text-chat-area").append(messageElement)
+}
+// ties broadcast button to session
+function broadcastButtonBuilder(sessionId) {
+    console.log(sessionId)
+    document.getElementById('broadcast-video').onclick = async () => {
+        const broadcast = await fetch(SERVER_BASE_URL + '/start-broadcast',
+            {
+                method: 'POST',
+                body: JSON.stringify({ sessionId: sessionId }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }
+        )
+        const broadcastJSON = await broadcast.json();
+        console.log(broadcastJSON)
+    }
 }
 // ties the button to the sessionId
 function archiveButtonBuilder(sessionId) {
     document.getElementById('archive-video').onclick = () => {
         if (!archiveToggle) { // no current archive
             console.log('sessionId for starting archive', sessionId)
-            appendMessage('Starting Archive','alert-message');
-
             fetch(SERVER_BASE_URL + '/start-archive',
                 {
                     method: 'POST',
@@ -103,8 +118,10 @@ function archiveButtonBuilder(sessionId) {
                         'Content-Type': 'application/json'
                     }
                 }
-            ).then(res => {
-                console.log('archive start response', res.body)
+            ).then(async res => {
+                let resJson = await res.json();
+                console.log('start response:', resJson)
+                appendMessage(`Starting Archive, archive file name will be ${resJson.id.split('-')[0]}`, 'alert-message');
             })
         } else if (archiveToggle) {
             archiveStopper(sessionId)
@@ -137,9 +154,13 @@ function newSessionButtons(session) {
     document.getElementById("disconnect-video").disabled = false;
     document.getElementById('screen-share').disabled = false;
     document.getElementById('archive-video').disabled = false;
+    document.getElementById('broadcast-video').disabled = false;
     document.getElementById("disconnect-video").onclick = () => {
         session.disconnect();
     }
+    chatButtonBuilder(session);
+    archiveButtonBuilder(session.sessionId)
+    broadcastButtonBuilder(session.sessionId)
 }
 function noSessionButtons() {
     console.log('noSessionButtons called')
@@ -147,6 +168,8 @@ function noSessionButtons() {
     document.getElementById('disconnect-video').disabled = true;
     document.getElementById('screen-share').disabled = true;
     document.getElementById('archive-video').disabled = true;
+    document.getElementById('broadcast-video').disabled = true;
+
 
 }
 
@@ -184,10 +207,6 @@ function initializeSession(apiKey, sessionId) {
             session.publish(webCamPublisher, handleError);
             newSessionButtons(session);
         }
-        // set up chat area when session is connected
-        chatButtonBuilder(session);
-        //set up archive with new buttons
-        archiveButtonBuilder(session.sessionId)
     });
 
     // when another disconnects
@@ -208,7 +227,7 @@ function initializeSession(apiKey, sessionId) {
         }).catch(handleError)
         noSessionButtons();
         archiveStopper(session.sessionId)
-        appendMessage('Video chat ended','alert-message');
+        appendMessage('Video chat ended', 'alert-message');
 
     })
     // publisher to the session via screen sharing 
@@ -225,7 +244,7 @@ function initializeSession(apiKey, sessionId) {
             session.unpublish(webCamPublisher)
             session.publish(screenSharePublisher, handleError);
             screenShare = true;
-            appendMessage('Screen share enabled','alert-message');
+            appendMessage('Screen share enabled', 'alert-message');
         } else if (screenShare) {
             webCamPublisher = OT.initPublisher('publisher', {
                 insertMode: 'append',
@@ -235,7 +254,7 @@ function initializeSession(apiKey, sessionId) {
             session.unpublish(screenSharePublisher)
             session.publish(webCamPublisher, handleError);
             screenShare = false;
-            appendMessage('Sceen share disabled','alert-message');
+            appendMessage('Sceen share disabled', 'alert-message');
         }
     }
     session.on('streamDestroyed', (event) => {
@@ -243,13 +262,12 @@ function initializeSession(apiKey, sessionId) {
     })
     session.on('archiveStarted', event => {
         console.log('archive started:', event)
-        console.log(session.archives)
         document.getElementById('archive-video').innerText = 'Stop Archiving'
         archiveToggle = true;
     })
     session.on('archiveStopped', event => {
         console.log('archive stopped:', event)
-        appendMessage('Archive stopped','alert-message');
+        appendMessage('Archive stopped', 'alert-message');
         //this behavior is either triggered by us disconnecting from the
         //session or the archive, the listener doesn't seem to work once we
         //disconnect from the session
