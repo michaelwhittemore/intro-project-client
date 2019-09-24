@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "dependencies": {
+    "@videojs/http-streaming": "^1.10.5",
     "eslint-config-airbnb": "^18.0.1"
   },
   "devDependencies": {

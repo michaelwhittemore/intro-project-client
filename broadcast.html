@@ -1,32 +1,53 @@
+<!-- 
 <html>
-
 <head>
-    <title> Broadcast Viewer</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link href="css/app.css" rel="stylesheet" type="text/css">
+    
     <script type="text/javascript" src="js/broadcast.js"></script>
-    <script src="video.js"></script>
-    <script src="videojs.hls.min.js"></script>
+    <script src="https://unpkg.com/video.js/dist/video.js"></script>
+    <script src="https://unpkg.com/@videojs/http-streaming/dist/videojs-http-streaming.js"></script>
     <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
 </head>
-
 <body>
     <div class="container-fluid">
-        <!-- title area-->
+        
         <div class="page-header">
             <h1> Broadcast Viewer</h1>
             <p> info </p>
         </div>
         <div id="video-container">
-
         </div>
-
-
-
-
     </div>
-
 </body>
-
 </html>
+-->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <title> Broadcast Viewer</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="css/app.css" rel="stylesheet" type="text/css">
+
+    <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
+</head>
+
+<body>
+    <h1>Video.js Example Embed</h1>
+
+
+    <video-js id="a-div">
+
+    </video-js>
+
+    <form> 
+        Enter your hls url here:
+        <input type="text" id='hls-url'>
+    </form>
+    <button id='start-stream'>start stream</button>
+    <script src="https://unpkg.com/video.js/dist/video.js"></script>
+    <script src="https://unpkg.com/@videojs/http-streaming/dist/videojs-http-streaming.js"></script>
+    <script src="js/broadcast.js"></script>
+</body>
