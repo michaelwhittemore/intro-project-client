@@ -91,19 +91,50 @@ function appendMessage(message, style) {
 }
 // ties broadcast button to session
 function broadcastButtonBuilder(sessionId) {
-    console.log(sessionId)
     document.getElementById('broadcast-video').onclick = async () => {
-        const broadcast = await fetch(SERVER_BASE_URL + '/start-broadcast',
-            {
-                method: 'POST',
-                body: JSON.stringify({ sessionId: sessionId }),
-                headers: {
-                    'Content-Type': 'application/json'
+        if (!broadcastToggle) {
+            const broadcast = await fetch(SERVER_BASE_URL + '/start-broadcast',
+                {
+                    method: 'POST',
+                    body: JSON.stringify({ sessionId: sessionId }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
                 }
+            )
+            const broadcastJSON = await broadcast.json();
+            document.getElementById('url-area').innerText = broadcastJSON.broadcastUrls.hls + ' Click on the link to copy'
+            appendMessage('Now broadcasting', 'alert-message')
+            broadcastToggle = true;
+            document.getElementById('broadcast-video').innerText = 'Stop Broadcast'
+            // copy to clickboard
+            document.getElementById('url-area').onclick = () => {
+                let hidden = document.createElement('textarea');
+                hidden.value = broadcastJSON.broadcastUrls.hls;
+                hidden.setAttribute('readonly', '');
+                hidden.style = { position: 'absolute', left: '-9999px' };
+                document.body.appendChild(hidden);
+                hidden.select();
+                document.execCommand('copy');
+                document.body.removeChild(hidden);
             }
-        )
-        const broadcastJSON = await broadcast.json();
-        document.getElementById('url-area').innerText = broadcastJSON.broadcastUrls.hls
+        } else if (broadcastToggle) {
+            console.log('stopping broadcast')
+            const stopBroadcast = await fetch(SERVER_BASE_URL + '/stop-broadcast',
+                {
+                    method: 'POST',
+                    body: JSON.stringify({ sessionId: sessionId }),
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }
+            )
+            console.log(stopBroadcast);
+            document.getElementById('url-area').innerText = 'Your hls url will appear here when you broadcast'
+            broadcastToggle = false;
+            appendMessage('Stopped broadcasting', 'alert-message')
+            document.getElementById('broadcast-video').innerText = 'Start Broadcast'
+        }
     }
 }
 // ties the button to the sessionId

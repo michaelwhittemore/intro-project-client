@@ -47,3 +47,6 @@ body, html {
 #page-content-wrapper{
     height: 70%
 }
+#url{
+    display: none
+}
