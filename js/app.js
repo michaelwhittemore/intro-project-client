@@ -5,8 +5,8 @@ function handleError(error) {
     }
 }
 
-//const SERVER_BASE_URL = 'https://intro-project.herokuapp.com';
-const SERVER_BASE_URL = "http://localhost:3000" //Remove this later, use for testing
+const SERVER_BASE_URL = 'https://intro-project.herokuapp.com';
+//const SERVER_BASE_URL = "http://localhost:3000" //Remove this later, use for testing
 let archiveToggle = false; // it seems like there is no way to get the
 let broadcastToggle = false;
 // status of the archive directly from the session??? so i'm 
@@ -74,7 +74,7 @@ function chatButtonBuilder(session) {
         }, handleError)
         appendMessage(outgoingMessage, 'outgoing-message');
     }
-    // let you submit via enter
+    // let you submit via return
     document.addEventListener('keydown', (event => {
         if (event.keyCode === 13) {
             document.getElementById('submit-chat').click()
@@ -103,7 +103,7 @@ function broadcastButtonBuilder(sessionId) {
                 }
             )
             const broadcastJSON = await broadcast.json();
-            document.getElementById('url-area').innerText = broadcastJSON.broadcastUrls.hls + ' Click on the link to copy'
+            document.getElementById('url-area').innerText = broadcastJSON.broadcastUrls.hls + ' Click here to copy'
             appendMessage('Now broadcasting', 'alert-message')
             broadcastToggle = true;
             document.getElementById('broadcast-video').innerText = 'Stop Broadcast'
@@ -117,6 +117,7 @@ function broadcastButtonBuilder(sessionId) {
                 hidden.select();
                 document.execCommand('copy');
                 document.body.removeChild(hidden);
+                alert('copied to clipboard')
             }
         } else if (broadcastToggle) {
             console.log('stopping broadcast')
@@ -307,17 +308,3 @@ function initializeSession(apiKey, sessionId) {
         archiveToggle = false;
     })
 }
-
-
-
-
-//start a video feed
-// fetch(SERVER_BASE_URL + '/session').then(function (res) {
-//     return res.json()
-// }).then(function (res) {
-//     apiKey = res.apiKey;
-//     console.log(res)
-//     sessionId = res.sessionId;
-//     token = res.token;
-//     initializeSession();
-// }).catch(handleError);

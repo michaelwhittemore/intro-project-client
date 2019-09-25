@@ -1,8 +1,14 @@
 body, html {
-    background-color: gray;
+    background-color: #1A1A1D;
     height: 100%;
+    color: white;
 }
-
+a {
+    color: #C3073f;
+}
+h1 {
+    text-align: center;
+}
 #videos {
     position: relative;
     width: 100%;
@@ -47,6 +53,7 @@ body, html {
 #page-content-wrapper{
     height: 70%
 }
-#url{
-    display: none
+#videojs{
+    height: 480px;
+    width: 680px
 }

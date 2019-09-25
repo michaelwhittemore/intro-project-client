@@ -1,27 +1,3 @@
-<!-- 
-<html>
-<head>
-    
-    <script type="text/javascript" src="js/broadcast.js"></script>
-    <script src="https://unpkg.com/video.js/dist/video.js"></script>
-    <script src="https://unpkg.com/@videojs/http-streaming/dist/videojs-http-streaming.js"></script>
-    <script src="https://static.opentok.com/v2/js/opentok.min.js"></script>
-</head>
-<body>
-    <div class="container-fluid">
-        
-        <div class="page-header">
-            <h1> Broadcast Viewer</h1>
-            <p> info </p>
-        </div>
-        <div id="video-container">
-        </div>
-    </div>
-</body>
-</html>
--->
-
-<!DOCTYPE html>
 <html>
 
 <head>
@@ -29,25 +5,38 @@
     <title> Broadcast Viewer</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">Ï
     <link href="css/app.css" rel="stylesheet" type="text/css">
 
     <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
 </head>
 
 <body>
-    <h1>Video.js Example Embed</h1>
+    <div class="container-fluid">
+        <!-- title area-->
+        <div class="page-header">
+            <h1> Onboarding Web App</h1>
+            <p> 
+                    A simple project, built with the aim of learning the OpenTok JS SDK. Features video publishing and subscribing, screen-sharing, archiving, messaging via signaling, and HLS broadcasting. Built using vanilla JS and bootstrap on the client side and Node/Express on the server side. 
 
+                    Users are assigned a role (either Idea or Investor) upon loading the page. A session is started whenever a user enters the video queue. They are matched with the first available opposite role in the queue who they have not previously	interacted with. 
+                    
+                     
+                <a href="index.html"> Return to the main page. </a>
+            </p>
+        </div>
+        <!-- stream to the video-js element-->
+        <video-js id="videojs">
+        </video-js>
 
-    <video-js id="a-div">
-
-    </video-js>
-
-    <form> 
-        Enter your hls url here:
-        <input type="text" id='hls-url'>
-    </form>
-    <button id='start-stream'>start stream</button>
-    <script src="https://unpkg.com/video.js/dist/video.js"></script>
-    <script src="https://unpkg.com/@videojs/http-streaming/dist/videojs-http-streaming.js"></script>
-    <script src="js/broadcast.js"></script>
+        <form>
+            Enter your hls url here:
+            <input type="text" id='hls-url'>
+        </form>
+        <button id='start-stream'>start stream</button>
+        <script src="https://unpkg.com/video.js/dist/video.js"></script>
+        <script src="https://unpkg.com/@videojs/http-streaming/dist/videojs-http-streaming.js"></script>
+        <script src="js/broadcast.js"></script>
+    </div>
 </body>
